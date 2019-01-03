@@ -25,22 +25,22 @@ type CharDB struct {
 type Levels map[int]*Level
 
 type Level struct {
-	Strength    int      `json:"strength"`
-	Agility     int      `json:"agility"`
-	Intellect   int      `json:"intellect"`
-	Will        int      `json:"will"`
-	Perception  int      `json:"perception"`
-	Defense     int      `json:"defense"`
-	Health      int      `json:"health"`
-	HealingRate float64  `json:"healing_rate"`
-	Speed       int      `json:"speed"`
-	Power       int      `json:"power"`
-	Damage      int      `json:"damage"`
-	Insanity    int      `json:"insanity"`
-	Corruption  int      `json:"corruption"`
-	Size        string   `json:"size"`
-	LangAndProf []string `json:"lang_and_prof"`
-	Talents     []string `json:"talents"`
+	Strength      int      `json:"strength"`
+	Agility       int      `json:"agility"`
+	Intellect     int      `json:"intellect"`
+	Will          int      `json:"will"`
+	PerceptionMod int      `json:"perception_mod"`
+	DefenseMod    int      `json:"defense_mod"`
+	HealthMod     int      `json:"health_mod"`
+	HealingRate   float64  `json:"healing_rate"`
+	Speed         int      `json:"speed"`
+	Power         int      `json:"power"`
+	Damage        int      `json:"damage"`
+	Insanity      int      `json:"insanity"`
+	Corruption    int      `json:"corruption"`
+	Size          string   `json:"size"`
+	LangAndProf   []string `json:"lang_and_prof"`
+	Talents       []string `json:"talents"`
 }
 
 var reWhite = regexp.MustCompile(`(?m:\s+)`)
@@ -126,7 +126,7 @@ func PDFToText(fn string, out io.Writer) error {
 }
 
 // Create a new SotDL character database.
-func NewCharDB(fn string, overwrite bool) CharDB {
+func NewCharDB(fn string, overwrite bool, analyze bool) CharDB {
 	db := CharDB{}
 	// Build db.
 	jsonFn := strings.Replace(fn, "pdf", "json", -1)
@@ -144,6 +144,9 @@ func NewCharDB(fn string, overwrite bool) CharDB {
 		db.extract(doc, expertPaths, expertPathLevelPatterns)
 		db.extract(doc, masterPaths, masterPathLevelPatterns)
 		db.save(jsonFn)
+		if analyze {
+			db.analyze(doc)
+		}
 	} else {
 		// Load an existing db.
 		db.load(jsonFn)
@@ -205,20 +208,26 @@ func strToInt(s string) (i int) {
 }
 
 var attributePatterns = map[string]*regexp.Regexp{
-	"Strength":   regexp.MustCompile(`Strength (\d+)`),
-	"Agility":    regexp.MustCompile(`Agility (\d+)`),
-	"Intellect":  regexp.MustCompile(`Intellect (\d+)`),
-	"Will":       regexp.MustCompile(`Will (\d+)`),
-	"Perception": regexp.MustCompile(`Perception\s*\+\s*(\d+)`),
-	"Defense":    regexp.MustCompile(`Defense\s*\+\s*(\d+)`),
-	"Health":     regexp.MustCompile(`Health\s*\+\s*(\d+)`),
+	"Strength":   regexp.MustCompile(`Strength (?P<n>\d+)`),
+	"Agility":    regexp.MustCompile(`Agility (?P<n>\d+)`),
+	"Intellect":  regexp.MustCompile(`Intellect (?P<n>\d+)`),
+	"Will":       regexp.MustCompile(`Will (?P<n>\d+)`),
+	"Perception": regexp.MustCompile(`Perception\s*(by|\+)\s*(?P<n>\d+)`),
+	"Defense":    regexp.MustCompile(`Defense\s*(by|\+)\s*(?P<n>\d+)`),
+	"Health":     regexp.MustCompile(`Health\s*(by|\+)\s*(?P<n>\d+)`),
+	"Power":      regexp.MustCompile(`Power\s*(by|\+)\s*(?P<n>\d+)`),
 }
 
 func (lvl *Level) parsePrimary(text string) {
 	for attr, ptn := range attributePatterns {
 		m := ptn.FindStringSubmatch(text)
 		if len(m) > 1 {
-			n, _ := strconv.Atoi(m[1])
+			var n int
+			for i, name := range ptn.SubexpNames() {
+				if name == "n" {
+					n, _ = strconv.Atoi(m[i])
+				}
+			}
 			switch attr {
 			case "Strength":
 				lvl.Strength += n
@@ -229,11 +238,13 @@ func (lvl *Level) parsePrimary(text string) {
 			case "Will":
 				lvl.Will += n
 			case "Perception":
-				lvl.Perception += n
+				lvl.PerceptionMod += n
 			case "Defense":
-				lvl.Defense += n
+				lvl.DefenseMod += n
 			case "Health":
-				lvl.Health += n
+				lvl.HealthMod += n
+			case "Power":
+				lvl.Power += n
 			}
 		}
 	}
@@ -248,13 +259,13 @@ func (lvl *Level) parseDerived(text string) {
 		mod, _ = strconv.Atoi(m[1])
 	}
 	if strings.Contains(text, "equals your Strength") {
-		lvl.Health = lvl.Strength + mod
+		lvl.HealthMod += mod
 	}
 	if strings.Contains(text, "equals your Agility") {
-		lvl.Defense = lvl.Agility + mod
+		lvl.DefenseMod += mod
 	}
 	if strings.Contains(text, "equals your Intellect") {
-		lvl.Perception = lvl.Intellect + mod
+		lvl.PerceptionMod += mod
 	}
 }
 
@@ -272,7 +283,9 @@ func (lvl *Level) parseTalents(text string) {
 		lvl.LangAndProf = append(lvl.LangAndProf, m[1])
 		text = strings.Replace(text, m[0], "", 1)
 	}
-	lvl.Talents = append(lvl.Talents, trim(text))
+	if text != "" {
+		lvl.Talents = append(lvl.Talents, trim(text))
+	}
 }
 
 func (db *CharDB) extract(doc string, paths []string, pathPatterns map[int]string) {
@@ -311,40 +324,40 @@ func (db *CharDB) extract(doc string, paths []string, pathPatterns map[int]strin
 
 // Parse the SotDL core rules and extract data to Character DB.
 func init() {
-	db = NewCharDB("./assets/Shadow_of_the_Demon_Lord.pdf", false)
+	db = NewCharDB("./assets/Shadow_of_the_Demon_Lord.pdf", true, false)
 }
 
-//func extractPaths(doc string) {
-//	for p := range ancestries {
-//		path := ancestries[p]
-//		reMap := compilePatterns(path, ancestryLevelPatterns)
-//		fmt.Printf("%s :: %d :: %q\n", path, 1, reMap[0].FindAllStringSubmatch(doc, -1)[0][1:13])
-//		fmt.Printf("%s :: %d :: %q\n", path, 2, reMap[4].FindAllStringSubmatch(doc, -1)[0][1:2])
-//		fmt.Println()
-//	}
-//	for p := range novicePaths {
-//		path := novicePaths[p]
-//		reMap := compilePatterns(path, novicePathLevelPatterns)
-//		fmt.Printf("%s :: %d :: %q\n", path, 1, reMap[1].FindAllStringSubmatch(doc, -1)[0][1:4])
-//		fmt.Printf("%s :: %d :: %q\n", path, 2, reMap[2].FindAllStringSubmatch(doc, -1)[0][1:3])
-//		fmt.Printf("%s :: %d :: %q\n", path, 5, reMap[5].FindAllStringSubmatch(doc, -1)[0][1:3])
-//		fmt.Printf("%s :: %d :: %q\n", path, 8, reMap[8].FindAllStringSubmatch(doc, -1)[0][1:3])
-//		fmt.Println()
-//	}
-//	for p := range expertPaths {
-//		path := expertPaths[p]
-//		reMap := compilePatterns(path, expertPathLevelPatterns)
-//		fmt.Printf("%s :: %d :: %q\n", path, 3, reMap[3].FindAllStringSubmatch(doc, -1)[0][1:4])
-//		fmt.Printf("%s :: %d :: %q\n", path, 6, reMap[6].FindAllStringSubmatch(doc, -1)[0][1:3])
-//		fmt.Printf("%s :: %d :: %q\n", path, 9, reMap[9].FindAllStringSubmatch(doc, -1)[0][1:3])
-//		fmt.Println()
-//	}
-//	for p := range masterPaths {
-//		path := masterPaths[p]
-//		reMap := compilePatterns(path, masterPathLevelPatterns)
-//		fmt.Printf("%s :: %d :: %q\n", path, 7, reMap[7].FindAllStringSubmatch(doc, -1)[0][1:4])
-//		fmt.Printf("%s :: %d :: %q\n", path, 10, reMap[10].FindAllStringSubmatch(doc, -1)[0][1:3])
-//		fmt.Println()
-//	}
+func (c *CharDB) analyze(doc string) {
+	for p := range ancestries {
+		path := ancestries[p]
+		reMap := compilePatterns(path, ancestryLevelPatterns)
+		fmt.Printf("%s :: %d :: %q\n", path, 1, reMap[0].FindAllStringSubmatch(doc, -1)[0][1:13])
+		fmt.Printf("%s :: %d :: %q\n", path, 2, reMap[4].FindAllStringSubmatch(doc, -1)[0][1:2])
+		fmt.Println()
+	}
+	for p := range novicePaths {
+		path := novicePaths[p]
+		reMap := compilePatterns(path, novicePathLevelPatterns)
+		fmt.Printf("%s :: %d :: %q\n", path, 1, reMap[1].FindAllStringSubmatch(doc, -1)[0][1:4])
+		fmt.Printf("%s :: %d :: %q\n", path, 2, reMap[2].FindAllStringSubmatch(doc, -1)[0][1:3])
+		fmt.Printf("%s :: %d :: %q\n", path, 5, reMap[5].FindAllStringSubmatch(doc, -1)[0][1:3])
+		fmt.Printf("%s :: %d :: %q\n", path, 8, reMap[8].FindAllStringSubmatch(doc, -1)[0][1:3])
+		fmt.Println()
+	}
+	for p := range expertPaths {
+		path := expertPaths[p]
+		reMap := compilePatterns(path, expertPathLevelPatterns)
+		fmt.Printf("%s :: %d :: %q\n", path, 3, reMap[3].FindAllStringSubmatch(doc, -1)[0][1:4])
+		fmt.Printf("%s :: %d :: %q\n", path, 6, reMap[6].FindAllStringSubmatch(doc, -1)[0][1:3])
+		fmt.Printf("%s :: %d :: %q\n", path, 9, reMap[9].FindAllStringSubmatch(doc, -1)[0][1:3])
+		fmt.Println()
+	}
+	for p := range masterPaths {
+		path := masterPaths[p]
+		reMap := compilePatterns(path, masterPathLevelPatterns)
+		fmt.Printf("%s :: %d :: %q\n", path, 7, reMap[7].FindAllStringSubmatch(doc, -1)[0][1:4])
+		fmt.Printf("%s :: %d :: %q\n", path, 10, reMap[10].FindAllStringSubmatch(doc, -1)[0][1:3])
+		fmt.Println()
+	}
 
-//}
+}

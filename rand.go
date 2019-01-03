@@ -49,6 +49,7 @@ func randomChoice(choices []string) string {
 }
 
 func randomInt(min, max int) int {
+	// Returns an int in [min,max).
 	return rand.Intn(max-min) + min
 }
 

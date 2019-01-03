@@ -10,15 +10,19 @@ type opt map[string]string
 func TestNewCharacter(t *testing.T) {
 	opts := []opt{
 		opt{
-			"name":   "Borkenhekenaken",
-			"gender": "Male",
-			"seed":   "1575d911f49e59ee",
-			"level":  "2",
+			"name":        "Borkenhekenaken",
+			"gender":      "Male",
+			"ancestry":    "Goblin",
+			"novice-path": "Magician",
+			"expert-path": "Wizard",
+			"seed":        "1575d911f49e59ee",
+			"level":       "3",
 		},
 		opt{
-			"name":   "Xev",
-			"gender": "",
-			"seed":   "",
+			"name":     "Xev",
+			"gender":   "",
+			"seed":     "",
+			"ancestry": "",
 		},
 	}
 	for _, o := range opts {

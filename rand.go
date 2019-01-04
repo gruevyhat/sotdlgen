@@ -1,6 +1,7 @@
 package sotdlgen
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"hash/fnv"
 	"math/rand"
@@ -24,12 +25,11 @@ func setSeed(charHash string) (string, error) {
 	if charHash == "" {
 		charHash = strconv.FormatInt(defaultSeed, 16)
 	}
-	src := []byte(charHash)
-	dst := make([]byte, hex.DecodedLen(len(src)))
-	seed, err := hex.Decode(dst, src)
+	h, err := hex.DecodeString(charHash)
 	if err != nil {
 		return charHash, err
 	}
+	seed := binary.BigEndian.Uint64(h)
 	rand.Seed(int64(seed))
 	return charHash, nil
 }
@@ -67,4 +67,19 @@ func weightedRandomChoice(choices []string, weights []float64) string {
 		}
 	}
 	return choices[0]
+}
+
+type Die struct {
+	code int
+	pips int
+}
+
+func (d Die) toStr() string {
+	var dieStr string
+	if d.pips > 0 {
+		dieStr = strconv.Itoa(d.code) + "d6+" + strconv.Itoa(d.pips)
+	} else {
+		dieStr = strconv.Itoa(d.code) + "d6"
+	}
+	return dieStr
 }

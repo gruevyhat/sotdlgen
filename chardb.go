@@ -324,7 +324,7 @@ func (db *CharDB) extract(doc string, paths []string, pathPatterns map[int]strin
 
 // Parse the SotDL core rules and extract data to Character DB.
 func init() {
-	db = NewCharDB("./assets/Shadow_of_the_Demon_Lord.pdf", true, false)
+	db = NewCharDB("./assets/Shadow_of_the_Demon_Lord.pdf", false, false)
 }
 
 func (c *CharDB) analyze(doc string) {

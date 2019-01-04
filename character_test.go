@@ -5,30 +5,26 @@ import (
 	"testing"
 )
 
-type opt map[string]string
-
 func TestNewCharacter(t *testing.T) {
-	opts := []opt{
-		opt{
-			"name":        "Borkenhekenaken",
-			"gender":      "Male",
-			"ancestry":    "Goblin",
-			"novice-path": "Magician",
-			"expert-path": "Wizard",
-			"seed":        "1575d911f49e59ee",
-			"level":       "3",
+	opts := []Opts{
+		Opts{
+			Name:     "Xev",
+			LogLevel: "INFO",
 		},
-		opt{
-			"name":     "Xev",
-			"gender":   "",
-			"seed":     "",
-			"ancestry": "",
+		Opts{
+			Name:       "Borkenhekenaken",
+			Gender:     "Male",
+			Ancestry:   "Goblin",
+			NovicePath: "Magician",
+			ExpertPath: "Wizard",
+			Seed:       "1575d911f49e59ee",
+			Level:      "3",
 		},
 	}
 	for _, o := range opts {
 		c := NewCharacter(o)
-		if c.Name != o["name"] {
-			t.Errorf("Incorrect name. Expected '%s'. Found '%s'.", c.Name, o["name"])
+		if c.Name != o.Name {
+			t.Errorf("Incorrect name. Expected '%s'. Found '%s'.", c.Name, o.Name)
 		}
 		if c.Hash == "" {
 			t.Error("Incorrect Hash. No value assigned")

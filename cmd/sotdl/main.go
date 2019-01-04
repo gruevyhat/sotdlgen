@@ -1,45 +1,33 @@
+// Package main implements a simple CLI for sotdlgen.
 package main
 
 import (
-	"os"
-
 	"github.com/docopt/docopt-go"
 	"github.com/gruevyhat/sotdlgen"
 )
 
-var usage = `M6IK Character Generator
+var usage = `SotDL Character Generator
 
-Usage: m6ikgen [options]
+Usage: sotdl [options]
 
 Options:
-  --name	The character's full name.
-  --gender	The character's gender.
-  --seed	Character generation signature.
-	--log-level	One of {INFO, WARNING, ERROR}. [default: ERROR]
+  -n, --name=<str>          The character's full name; random if not specified.
+  -g, --gender=<str>        The character's gender.
+	-l, --level=<int>         The character's level. [default: 0]
+  -A, --ancestry=<str>      The character's 0th lvl path (e.g., Human).
+  -N, --novice-path=<str>   The character's 1st lvl path (e.g., Rogue). 
+  -E, --expert-path=<str>   The character's 3rd lvl path (e.g., Fighter).
+  -M, --master-path=<str>   The character's 7th lvl path (e.g., Myrmidon).
+  -s, --seed=<hex>          Character generation signature.
+  --log-level=<str>         One of {INFO, WARNING, ERROR}. [default: ERROR]
   -h --help
   --version
 `
 
-var Opts struct {
-	Name     string `docopt:"--name"`
-	Gender   string `docopt:"--gender"`
-	Age      string `docopt:"--age"`
-	Seed     string `docopt:"--seed"`
-	LogLevel string `docopt:"--log-level"`
-}
-
 func main() {
-
-	optFlags, _ := docopt.ParseArgs(usage, os.Args[1:], sotdlgen.VERSION)
-	optFlags.Bind(&Opts)
-
-	opts := map[string]string{
-		"name":      Opts.Name,
-		"gender":    Opts.Gender,
-		"seed":      Opts.Seed,
-		"log-level": Opts.LogLevel,
-	}
-
+	opts := sotdlgen.Opts{}
+	optFlags, _ := docopt.ParseArgs(usage, nil, sotdlgen.VERSION)
+	optFlags.Bind(&opts)
 	c := sotdlgen.NewCharacter(opts)
-	c.Print()
+	c.ToJSON()
 }

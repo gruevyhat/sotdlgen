@@ -10,7 +10,7 @@ import (
 
 	"github.com/docopt/docopt-go"
 	"github.com/gorilla/mux"
-	"github.com/gruevyhat/m6ik"
+	"github.com/gruevyhat/sotdlgen"
 )
 
 var mutex sync.Mutex
@@ -44,7 +44,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		"log-level": "ERROR",
 	}
 	mutex.Lock()
-	c := m6ik.NewCharacter(charOpts)
+	c := sotdlgen.NewCharacter(charOpts)
 	mutex.Unlock()
 	json.NewEncoder(w).Encode(c.ToJSON())
 }

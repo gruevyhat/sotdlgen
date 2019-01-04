@@ -30,30 +30,29 @@ var cmdOpts struct {
 }
 
 func Generate(w http.ResponseWriter, r *http.Request) {
-	charOpts := map[string]string{
-		"name":      r.URL.Query().Get("name"),
-		"gender":    r.URL.Query().Get("gender"),
-		"age":       r.URL.Query().Get("age"),
-		"race":      r.URL.Query().Get("race"),
-		"careers":   r.URL.Query().Get("careers"),
-		"archetype": r.URL.Query().Get("archetype"),
-		"n_perks":   r.URL.Query().Get("n_perks"),
-		"n_attrs":   r.URL.Query().Get("n_attrs"),
-		"n_skills":  r.URL.Query().Get("n_skills"),
-		"seed":      r.URL.Query().Get("seed"),
-		"log-level": "ERROR",
+	charOpts := sotdlgen.Opts{
+		Name:       r.URL.Query().Get("name"),
+		Gender:     r.URL.Query().Get("gender"),
+		Level:      r.URL.Query().Get("level"),
+		Ancestry:   r.URL.Query().Get("ancestry"),
+		ExpertPath: r.URL.Query().Get("expert-path"),
+		MasterPath: r.URL.Query().Get("master-path"),
+		NovicePath: r.URL.Query().Get("novice-path"),
+		Seed:       r.URL.Query().Get("seed"),
+		LogLevel:   "ERROR",
 	}
 	mutex.Lock()
 	c := sotdlgen.NewCharacter(charOpts)
+	j := c.ToJSON()
 	mutex.Unlock()
-	json.NewEncoder(w).Encode(c.ToJSON())
+	json.NewEncoder(w).Encode(j)
 }
 
 func main() {
 	optFlags, _ := docopt.ParseDoc(usage)
 	optFlags.Bind(&cmdOpts)
 
-	fmt.Printf("M6IK Character Generation Service started at <http://localhost:%s>\n", cmdOpts.Port)
+	fmt.Printf("SotDL Character Generation Service started at <http://localhost:%s>\n", cmdOpts.Port)
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	router := mux.NewRouter()

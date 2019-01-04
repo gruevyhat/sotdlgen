@@ -300,13 +300,14 @@ func (c Character) Print() {
 }
 
 // Write JSON character details to STDOUT.
-func (c Character) ToJSON() {
+func (c Character) ToJSON() string {
 	j, _ := json.MarshalIndent(c, "  ", "  ")
 	fmt.Println(string(j))
 	//err := ioutil.WriteFile(fn, j, 0644)
 	//if err != nil {
 	//	panic(err)
 	//}
+	return string(j)
 }
 
 // Character options.

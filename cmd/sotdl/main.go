@@ -2,6 +2,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/docopt/docopt-go"
 	"github.com/gruevyhat/sotdlgen"
 )
@@ -19,6 +22,7 @@ Options:
   -E, --expert-path=<str>   The character's 3rd lvl path (e.g., Fighter).
   -M, --master-path=<str>   The character's 7th lvl path (e.g., Myrmidon).
   -s, --seed=<hex>          Character generation signature.
+  -d, --data-dir=<path>	    Directory containing SotDL PDF file.
   --log-level=<str>         One of {INFO, WARNING, ERROR}. [default: ERROR]
   -h --help
   --version
@@ -28,6 +32,10 @@ func main() {
 	opts := sotdlgen.Opts{}
 	optFlags, _ := docopt.ParseArgs(usage, nil, sotdlgen.VERSION)
 	optFlags.Bind(&opts)
-	c := sotdlgen.NewCharacter(opts)
+	c, err := sotdlgen.NewCharacter(opts)
+	if err != nil {
+		fmt.Println("An error has occured.")
+		os.Exit(1)
+	}
 	c.ToJSON()
 }

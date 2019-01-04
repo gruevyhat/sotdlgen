@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,8 +19,20 @@ import (
 
 var db = CharDB{}
 
+// Data filenames
+var corebookJSON = dataDir + "Shadow_of_the_Demon_Lord.json"
+var namesFile = dataDir + "ik_names.json"
+
 type CharDB struct {
 	Paths map[string]Levels `json:"paths"`
+	Names []NameList        `json:"names"`
+}
+
+type NameList struct {
+	Ancestry  string   `json:"ancestry"`
+	Ethnicity string   `json:"ethnicity"`
+	Type      string   `json:"type"`
+	Names     []string `json:"names"`
 }
 
 type Levels map[int]*Level
@@ -87,6 +100,14 @@ var masterPathLevelPatterns = map[int]string{
 
 type Patterns map[int]*regexp.Regexp
 
+func (db *CharDB) buildNames() {
+	var names []NameList
+	if err := json.Unmarshal(readJson(namesFile), &names); err != nil {
+		log.Error(err)
+	}
+	db.Names = names
+}
+
 // Compiles patterns to regular expressions.
 func compilePatterns(path string, ptns map[int]string) map[int]*regexp.Regexp {
 	reMap := Patterns{}
@@ -126,16 +147,15 @@ func PDFToText(fn string, out io.Writer) error {
 }
 
 // Create a new SotDL character database.
-func NewCharDB(fn string, overwrite bool, analyze bool) CharDB {
-	db := CharDB{}
+func NewCharDB(pdfFn string, analyze bool) (db CharDB, err error) {
 	// Build db.
-	jsonFn := strings.Replace(fn, "pdf", "json", -1)
-	if _, err := os.Stat(jsonFn); overwrite || os.IsNotExist(err) {
+	if _, err = os.Stat(corebookJSON); pdfFn != "" || os.IsNotExist(err) {
 		// Build db from PDF.
+		log.Info("Extracting DB from PDF.")
 		ws := &bytes.Buffer{}
-		err := PDFToText(fn, ws)
-		if err != nil {
-			panic(err)
+		if err = PDFToText(pdfFn, ws); err != nil {
+			log.Error("SotDL Core Rules not found.")
+			return db, err
 		}
 		doc := ws.String()
 		db.initialize()
@@ -143,15 +163,17 @@ func NewCharDB(fn string, overwrite bool, analyze bool) CharDB {
 		db.extract(doc, novicePaths, novicePathLevelPatterns)
 		db.extract(doc, expertPaths, expertPathLevelPatterns)
 		db.extract(doc, masterPaths, masterPathLevelPatterns)
-		db.save(jsonFn)
+		db.buildNames()
+		db.save()
 		if analyze {
 			db.analyze(doc)
 		}
 	} else {
 		// Load an existing db.
-		db.load(jsonFn)
+		log.Info("Loading DB from JSON.")
+		db.load(corebookJSON)
 	}
-	return db
+	return db, nil
 }
 
 // Build the nested maps.
@@ -180,6 +202,7 @@ func (db *CharDB) initialize() {
 }
 
 func (db *CharDB) load(fn string) {
+	fn = dataDir + path.Base(fn)
 	fi, err := os.Open(fn)
 	if err != nil {
 		panic(err)
@@ -191,9 +214,9 @@ func (db *CharDB) load(fn string) {
 	}
 }
 
-func (db *CharDB) save(fn string) {
+func (db *CharDB) save() {
 	j, _ := json.Marshal(db)
-	err := ioutil.WriteFile(fn, j, 0644)
+	err := ioutil.WriteFile(corebookJSON, j, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -320,11 +343,6 @@ func (db *CharDB) extract(doc string, paths []string, pathPatterns map[int]strin
 			}
 		}
 	}
-}
-
-// Parse the SotDL core rules and extract data to Character DB.
-func init() {
-	db = NewCharDB("./assets/Shadow_of_the_Demon_Lord.pdf", false, false)
 }
 
 func (c *CharDB) analyze(doc string) {

@@ -42,10 +42,15 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		LogLevel:   "ERROR",
 	}
 	mutex.Lock()
-	c := sotdlgen.NewCharacter(charOpts)
-	j := c.ToJSON()
+	c, err := sotdlgen.NewCharacter(charOpts)
+	var result string
+	if err != nil {
+		result = "An error has occurred."
+	} else {
+		result = c.ToJSON()
+	}
 	mutex.Unlock()
-	json.NewEncoder(w).Encode(j)
+	json.NewEncoder(w).Encode(result)
 }
 
 func main() {

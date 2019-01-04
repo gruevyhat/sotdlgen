@@ -3,6 +3,7 @@ package sotdlgen
 
 import (
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -10,10 +11,13 @@ var dataDir = getDataDir()
 
 func getDataDir() string {
 	dir := ""
-	//if dir = os.Getenv("GOPATH"); dir != "" {
-	//	dir += "/src/github.com/gruevyhat/sotdlgen/assets/"
-	//}
-	return dir + "./assets/"
+	if dir = os.Getenv("GOPATH"); dir != "" {
+		dir += "/src/github.com/gruevyhat/sotdlgen/"
+	} else {
+		dir += "./"
+	}
+	log.Info("Set data dir:", dir+"assets/")
+	return dir + "assets/"
 }
 
 func readJson(filename string) []byte {

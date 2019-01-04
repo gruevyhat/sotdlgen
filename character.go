@@ -156,13 +156,11 @@ func (c *Character) setCharHash(charHash string) {
 	var err error
 	c.Hash, err = setSeed(charHash)
 	if err != nil {
-		log.Error(err)
-	} else {
-		log.Info("Set new seed:", c.Hash)
+		log.Error("Failed to set character hash:", err)
 	}
 }
 
-//
+// Pick a random level in [0..10] if non supplied.
 func (c *Character) setLevel(level string) {
 	if level != "" {
 		c.Level, _ = strconv.Atoi(level)
@@ -326,19 +324,29 @@ type Opts struct {
 	NovicePath  string `docopt:"--novice-path"`
 	Professions string
 	Seed        string `docopt:"--seed"`
+	DataFile    string `docopt:"--data-dir"`
 }
 
 // Generates a new character given a set of options.
-func NewCharacter(opts Opts) Character {
+func NewCharacter(opts Opts) (c Character, err error) {
 
 	logging.SetLevel(logLevels[opts.LogLevel], "")
 
-	c := Character{}
+	// Load the character db if empty.
+	if len(db.Paths) == 0 {
+		log.Info("Loading Character DB.")
+		db, err = NewCharDB(opts.DataFile, false)
+		if err != nil {
+			fmt.Println(db)
+			return c, err
+		}
+	}
 
-	// Set random seed from hash
+	// Initialize character and set random seed from hash
 	c.setCharHash(opts.Seed)
 
 	// Generate base characteristics
+	log.Info("Generating attributes and characteristics.")
 	c.setLevel(opts.Level)
 	c.setPath(opts.Ancestry)
 	if c.Level > 0 {
@@ -358,6 +366,7 @@ func NewCharacter(opts Opts) Character {
 	c.setEquipment()
 
 	// Generate fluff
+	log.Info("Generating fluff.")
 	c.setName(opts.Name)
 	c.setGender(opts.Gender)
 	c.setDescription(opts.Description)
@@ -365,5 +374,5 @@ func NewCharacter(opts Opts) Character {
 	c.setProfessions(opts.Professions)
 	c.setLanguages(opts.Languages)
 
-	return c
+	return c, nil
 }

@@ -12,6 +12,10 @@ func TestNewCharacter(t *testing.T) {
 			LogLevel: "INFO",
 		},
 		Opts{
+			DataFile: "./assets/Shadow_of_the_Demon_Lord.pdf",
+			LogLevel: "INFO",
+		},
+		Opts{
 			Name:       "Borkenhekenaken",
 			Gender:     "Male",
 			Ancestry:   "Goblin",
@@ -19,10 +23,11 @@ func TestNewCharacter(t *testing.T) {
 			ExpertPath: "Wizard",
 			Seed:       "1575d911f49e59ee",
 			Level:      "3",
+			LogLevel:   "INFO",
 		},
 	}
 	for _, o := range opts {
-		c := NewCharacter(o)
+		c, _ := NewCharacter(o)
 		if c.Name != o.Name {
 			t.Errorf("Incorrect name. Expected '%s'. Found '%s'.", c.Name, o.Name)
 		}

@@ -9,12 +9,6 @@ import (
 	"time"
 )
 
-var defaultSeed = time.Now().UTC().UnixNano()
-
-func init() {
-	rand.Seed(defaultSeed)
-}
-
 func hash(s string) uint32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))
@@ -23,6 +17,7 @@ func hash(s string) uint32 {
 
 func setSeed(charHash string) (string, error) {
 	if charHash == "" {
+		defaultSeed := time.Now().UTC().UnixNano()
 		charHash = strconv.FormatInt(defaultSeed, 16)
 	}
 	h, err := hex.DecodeString(charHash)
@@ -31,6 +26,7 @@ func setSeed(charHash string) (string, error) {
 	}
 	seed := binary.BigEndian.Uint64(h)
 	rand.Seed(int64(seed))
+	log.Info("Set new seed:", seed)
 	return charHash, nil
 }
 

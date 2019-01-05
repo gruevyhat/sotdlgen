@@ -40,6 +40,6 @@ func main() {
 	if opts.DataFile != "" {
 		fmt.Println("Database extracted from file.")
 	} else {
-		c.ToJSON()
+		c.ToJSON(true)
 	}
 }

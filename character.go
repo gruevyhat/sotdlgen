@@ -65,7 +65,7 @@ type Character struct {
 	Talents     []string   `json:"talents"`
 	Level       int        `json:"level"`
 	Attributes  Attributes `json:"attributes"`
-	Hash        string
+	Seed        string     `json:"seed"`
 	//Background  string     `json:"background"`
 	//Description string     `json:"description"`
 	//Magic       []Spell    `json:"magic"`
@@ -152,9 +152,9 @@ func (c *Character) incrRandomAttrs(n int) {
 }
 
 // Sets the random seed from a hex hash string.
-func (c *Character) setCharHash(charHash string) {
+func (c *Character) setCharSeed(charSeed string) {
 	var err error
-	c.Hash, err = setSeed(charHash)
+	c.Seed, err = setSeed(charSeed)
 	if err != nil {
 		log.Error("Failed to set character hash:", err)
 	}
@@ -293,13 +293,18 @@ func (c Character) Print() {
 	fmt.Println("Name\t" + c.Name)
 	fmt.Println("Gender\t" + c.Gender)
 	fmt.Println("Level\t", c.Level)
-	fmt.Println("Character Hash\t", c.Hash)
+	fmt.Println("Character Seed\t", c.Seed)
 	fmt.Println()
 }
 
 // Write JSON character details to STDOUT.
-func (c Character) ToJSON() string {
-	j, _ := json.MarshalIndent(c, "  ", "  ")
+func (c Character) ToJSON(pretty bool) string {
+	var j []byte
+	if pretty {
+		j, _ = json.MarshalIndent(c, "  ", "  ")
+	} else {
+		j, _ = json.Marshal(c)
+	}
 	fmt.Println(string(j))
 	//err := ioutil.WriteFile(fn, j, 0644)
 	//if err != nil {
@@ -342,7 +347,7 @@ func NewCharacter(opts Opts) (c Character, err error) {
 	}
 
 	// Initialize character and set random seed from hash
-	c.setCharHash(opts.Seed)
+	c.setCharSeed(opts.Seed)
 
 	// Generate base characteristics
 	log.Info("Generating attributes and characteristics.")

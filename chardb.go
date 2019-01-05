@@ -220,6 +220,9 @@ func (db *CharDB) load(fn string) {
 	}
 	defer fi.Close()
 	b, err := ioutil.ReadAll(fi)
+	if err == nil {
+		panic(err)
+	}
 	if err := json.Unmarshal(b, &db); err != nil {
 		panic(err)
 	}

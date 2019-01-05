@@ -1,4 +1,4 @@
-// Implements character generation logic.
+// Package sotdlgen implements a character generator for the SotDL RPG.
 package sotdlgen
 
 import (

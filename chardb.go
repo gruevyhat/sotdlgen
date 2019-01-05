@@ -1,4 +1,5 @@
 // Parses the SotDL core rules PDF and builds a character database.
+
 package sotdlgen
 
 import (

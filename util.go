@@ -1,13 +1,51 @@
+// Helper functions for sotdlgen.
+
 package sotdlgen
 
 import (
 	"encoding/binary"
 	"encoding/hex"
 	"hash/fnv"
+	"io/ioutil"
 	"math/rand"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 )
+
+var dataDir = setDataDir()
+
+func setDataDir() string {
+	dir := os.Getenv("GOPATH") + "/src/github.com/gruevyhat/sotdlgen/assets/"
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.MkdirAll(dir, os.ModePerm)
+	}
+	return dir
+}
+
+func readJson(filename string) []byte {
+	raw, _ := ioutil.ReadFile(filename)
+	return raw
+}
+
+func arrayContains(arr []string, s string) bool {
+	for _, a := range arr {
+		if a == s || strings.HasPrefix(a, s) || strings.HasSuffix(s, a) {
+			return true
+		}
+	}
+	return false
+}
+
+func arrayRemove(s string, a []string) []string {
+	for i, x := range a {
+		if x == "" || x == s {
+			a = append(a[:i], a[i+1:]...)
+		}
+	}
+	return a
+}
 
 func hash(s string) uint32 {
 	h := fnv.New32a()

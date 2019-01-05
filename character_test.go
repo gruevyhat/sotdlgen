@@ -8,11 +8,11 @@ import (
 func TestNewCharacter(t *testing.T) {
 	opts := []Opts{
 		Opts{
-			Name:     "Xev",
+			DataFile: "./assets/Shadow_of_the_Demon_Lord.pdf",
 			LogLevel: "INFO",
 		},
 		Opts{
-			DataFile: "./assets/Shadow_of_the_Demon_Lord.pdf",
+			Name:     "Xev",
 			LogLevel: "INFO",
 		},
 		Opts{

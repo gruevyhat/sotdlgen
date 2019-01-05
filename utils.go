@@ -14,7 +14,6 @@ func setDataDir() string {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, os.ModePerm)
 	}
-	log.Info("Set data dir:", dir)
 	return dir
 }
 

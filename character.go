@@ -324,7 +324,7 @@ type Opts struct {
 	NovicePath  string `docopt:"--novice-path"`
 	Professions string
 	Seed        string `docopt:"--seed"`
-	DataFile    string `docopt:"--data-dir"`
+	DataFile    string `docopt:"--data-file"`
 }
 
 // Generates a new character given a set of options.

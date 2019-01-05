@@ -46,7 +46,7 @@ var (
 		"Technomancer", "Templar", "Tenebrist", "Thaumaturge", "Theurge", "Transmuter",
 		"Traveler", "Weapon Master", "Woodwose", "Zealot",
 	}
-	genders   = []string{"Male", "Female", "Other"}
+	genders   = []string{"Male", "Female"}
 	languages = []string{
 		"Common Tongue", "Dark Speech", "Dwarfish", "Elvish", "High Archaic", "Trollish",
 		"Secret Language",
@@ -266,6 +266,40 @@ func (c *Character) setPath(path string) {
 func (c *Character) setName(name string) {
 	if name != "" {
 		c.Name = name
+	} else {
+		firstNames := []string{}
+		surnames := []string{}
+		ethnicities := []string{}
+		for _, nl := range db.Names {
+			if nl.Ancestry == c.Ancestry && !arrayContains(ethnicities, nl.Ethnicity) {
+				ethnicities = append(ethnicities, nl.Ethnicity)
+			}
+		}
+		ethnicity := ""
+		if len(ethnicities) > 0 {
+			ethnicity = randomChoice(ethnicities)
+		} else {
+			ethnicity = db.Names[randomInt(0, len(db.Names))].Ethnicity
+		}
+		for _, nl := range db.Names {
+			if nl.Ethnicity == ethnicity {
+				switch nl.Type {
+				case c.Gender:
+					firstNames = append(firstNames, nl.Names...)
+				case "Surname":
+					surnames = append(surnames, nl.Names...)
+				}
+			}
+		}
+		firstName := ""
+		surname := ""
+		if len(firstNames) > 0 {
+			firstName = randomChoice(firstNames)
+		}
+		if len(surnames) > 0 {
+			surname = randomChoice(surnames)
+		}
+		c.Name = firstName + " " + surname
 	}
 }
 
@@ -371,8 +405,8 @@ func NewCharacter(opts Opts) (c Character, err error) {
 
 	// Generate fluff
 	log.Info("Generating fluff.")
-	c.setName(opts.Name)
 	c.setGender(opts.Gender)
+	c.setName(opts.Name)
 	c.setDescription(opts.Description)
 	c.setBackground(opts.Background)
 	c.setProfessions(opts.Professions)

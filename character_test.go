@@ -6,14 +6,17 @@ import (
 )
 
 func TestNewCharacter(t *testing.T) {
+	logLevel := "ERROR"
+	if testing.Verbose() {
+		logLevel = "INFO"
+	}
 	opts := []Opts{
 		Opts{
 			DataFile: "./assets/Shadow_of_the_Demon_Lord.pdf",
-			LogLevel: "INFO",
+			LogLevel: logLevel,
 		},
 		Opts{
-			Name:     "Xev",
-			LogLevel: "INFO",
+			LogLevel: logLevel,
 		},
 		Opts{
 			Name:       "Borkenhekenaken",
@@ -23,16 +26,16 @@ func TestNewCharacter(t *testing.T) {
 			ExpertPath: "Wizard",
 			Seed:       "1575d911f49e59ee",
 			Level:      "3",
-			LogLevel:   "INFO",
+			LogLevel:   logLevel,
 		},
 	}
 	for _, o := range opts {
 		c, _ := NewCharacter(o)
-		if c.Name != o.Name {
-			t.Errorf("Incorrect name. Expected '%s'. Found '%s'.", c.Name, o.Name)
+		if c.Name == "" {
+			t.Error("Missing name.")
 		}
 		if c.Seed == "" {
-			t.Error("Incorrect Hash. No value assigned")
+			t.Error("Incorrect Seed. No value assigned")
 		}
 		if !arrayContains(genders, c.Gender) {
 			g := strings.Join(genders, ", ")

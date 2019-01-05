@@ -11,14 +11,14 @@ func TestNewCharacter(t *testing.T) {
 		logLevel = "INFO"
 	}
 	opts := []Opts{
-		Opts{
+		{
 			DataFile: "./assets/Shadow_of_the_Demon_Lord.pdf",
 			LogLevel: logLevel,
 		},
-		Opts{
+		{
 			LogLevel: logLevel,
 		},
-		Opts{
+		{
 			Name:       "Borkenhekenaken",
 			Gender:     "Male",
 			Ancestry:   "Goblin",

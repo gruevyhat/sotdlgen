@@ -29,7 +29,7 @@ var cmdOpts struct {
 	Port string `docopt:"--port"`
 }
 
-func Generate(w http.ResponseWriter, r *http.Request) {
+func generate(w http.ResponseWriter, r *http.Request) {
 	charOpts := sotdlgen.Opts{
 		Name:       r.URL.Query().Get("name"),
 		Gender:     r.URL.Query().Get("gender"),
@@ -58,7 +58,7 @@ func main() {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	router := mux.NewRouter()
-	router.HandleFunc("/", Generate).Methods("GET")
-	router.HandleFunc("/generate", Generate).Methods("GET")
+	router.HandleFunc("/", generate).Methods("GET")
+	router.HandleFunc("/generate", generate).Methods("GET")
 	log.Fatal(http.ListenAndServe(":"+cmdOpts.Port, router))
 }

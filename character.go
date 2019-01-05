@@ -53,7 +53,7 @@ var (
 	}
 )
 
-// Declare primary character data structure.
+// Character represents the primary features of the character.
 type Character struct {
 	Name        string     `json:"name"`
 	Gender      string     `json:"gender"`
@@ -74,7 +74,7 @@ type Character struct {
 	//Equipment   []string   `json:"equipment"`
 }
 
-// Declare character statistics struct.
+// Attributes represents character statistics.
 type Attributes struct {
 	Strength              int    `json:"strength"`
 	Agility               int    `json:"agility"`
@@ -95,8 +95,9 @@ type Attributes struct {
 	healingRateMultiplier float64
 }
 
-// TODO: Implement spells.
+// Spell represents properties of a given spell.
 type Spell struct {
+	// TODO: Implement spells.
 	Name         string `json:"name"`
 	Type         string `json:"type"`
 	Rank         int    `json:"rank"`
@@ -110,8 +111,9 @@ type Spell struct {
 	Description  string `json:"description"`
 }
 
-// TODO: Implement weapons.
+// Weapon represents properties of a given weapon.
 type Weapon struct {
+	// TODO: Implement weapons.
 	Name         string `json:"name"`
 	Type         string `json:"type"`
 	Hands        string `json:"hands"`
@@ -128,8 +130,9 @@ type Weapon struct {
 	Damage       Die    `json:"damage"`
 }
 
-// TODO: Implement armor.
+// Armor represents properties of a given suit of armor.
 type Armor struct {
+	// TODO: Implement armor.
 	Name         string `json:"name"`
 	Type         string `json:"type"`
 	DefenseBonus int    `json:"defense"`
@@ -140,13 +143,13 @@ func (c *Character) incrRandomAttrs(n int) {
 	for i := 0; i < n; i++ {
 		switch randomInt(0, 4) {
 		case 0:
-			c.Attributes.Strength += 1
+			c.Attributes.Strength++
 		case 1:
-			c.Attributes.Agility += 1
+			c.Attributes.Agility++
 		case 2:
-			c.Attributes.Intellect += 1
+			c.Attributes.Intellect++
 		case 3:
-			c.Attributes.Will += 1
+			c.Attributes.Will++
 		}
 	}
 }
@@ -322,7 +325,7 @@ func (c *Character) setBackground(background string)   {}
 func (c *Character) setProfessions(professions string) {}
 func (c *Character) setLanguages(languages string)     {}
 
-// Write tab-delimited character details to STDOUT.
+// Print writes tab-delimited character details to STDOUT.
 func (c Character) Print() {
 	fmt.Println("Name\t" + c.Name)
 	fmt.Println("Gender\t" + c.Gender)
@@ -331,7 +334,7 @@ func (c Character) Print() {
 	fmt.Println()
 }
 
-// Write JSON character details to STDOUT.
+// ToJSON writes JSON character details to STDOUT.
 func (c Character) ToJSON(pretty bool) string {
 	var j []byte
 	if pretty {
@@ -347,7 +350,7 @@ func (c Character) ToJSON(pretty bool) string {
 	return string(j)
 }
 
-// Character options.
+// Opts contains user input optionsr; used in CLI implementations.
 type Opts struct {
 	Age         string
 	Ancestry    string `docopt:"--ancestry"`
@@ -366,7 +369,7 @@ type Opts struct {
 	DataFile    string `docopt:"--data-file"`
 }
 
-// Generates a new character given a set of options.
+// NewCharacter generates a SotDL character given a set of user options.
 func NewCharacter(opts Opts) (c Character, err error) {
 
 	logging.SetLevel(logLevels[opts.LogLevel], "")

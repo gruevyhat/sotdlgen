@@ -24,7 +24,7 @@ func setDataDir() string {
 	return dir
 }
 
-func readJson(filename string) []byte {
+func readJSON(filename string) []byte {
 	raw, _ := ioutil.ReadFile(filename)
 	return raw
 }
@@ -103,6 +103,7 @@ func weightedRandomChoice(choices []string, weights []float64) string {
 	return choices[0]
 }
 
+// Die represents a single die of the form <code>D6+<pips>.
 type Die struct {
 	code int
 	pips int

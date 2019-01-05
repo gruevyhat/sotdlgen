@@ -1,3 +1,7 @@
+github.com/client9/misspell v0.3.4 h1:ta993UF76GwbvJcIo3Y68y/M3WxlpEHPWIGDkJYwzJI=
+github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
+github.com/dnephin/govet v0.0.0-20171012192244-4a96d43e39d3 h1:LrNBULdC8dhFb7VeeIfuLAVq2IOFtVD9zIYh838jWfM=
+github.com/dnephin/govet v0.0.0-20171012192244-4a96d43e39d3/go.mod h1:pPTX0MEEoAnfbrAGFj4nSVNhl6YbugRj6eardUZdtGo=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 h1:bWDMxwH3px2JBh6AyO7hdCn/PkvCZXii8TGj7sbtEbQ=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815/go.mod h1:WwZ+bS3ebgob9U8Nd0kOddGdZWjyMGR8Wziv+TBNwSE=
 github.com/gorilla/context v1.1.1 h1:AWwleXJkX/nhcU9bZSnZoi3h/qGYqQAGhq6zZe/aQW8=

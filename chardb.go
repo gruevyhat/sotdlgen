@@ -24,13 +24,19 @@ var db = CharDB{}
 var corebookJSON = dataDir + "Shadow_of_the_Demon_Lord.json"
 var namesFile = dataDir + "ik_names.json"
 
+// CharDB represents path data extracted from the core rules PDF, along with
+// a list of names for random character naming.
 type CharDB struct {
 	Paths map[string]Levels `json:"paths"`
 	Names []NameList        `json:"names"`
 }
 
+// Levels is a map of Level structs.
 type Levels map[int]*Level
 
+// Level contains attributes and characteristics, as well as narrative talents
+// and professions/languages extracted from the core rules. A single level
+// represents an ancestry or path at a given character level.
 type Level struct {
 	Strength      int      `json:"strength"`
 	Agility       int      `json:"agility"`
@@ -92,8 +98,11 @@ var masterPathLevelPatterns = map[int]string{
 	10: `(?s)Level 10 %s.*?Characteristics (?P<Char>.*?)\n(?P<Desc>.*?)\n\n`,
 }
 
+// Patterns is a map of compiled regular expressions.
 type Patterns map[int]*regexp.Regexp
 
+// NameList represents the list of names for a given ancestry, ethnicity,
+// and type.
 type NameList struct {
 	Ancestry  string   `json:"ancestry"`
 	Ethnicity string   `json:"ethnicity"`
@@ -101,9 +110,10 @@ type NameList struct {
 	Names     []string `json:"names"`
 }
 
+// buildNames reads the name data in from JSON.
 func (db *CharDB) buildNames() {
 	var names []NameList
-	if err := json.Unmarshal(readJson(namesFile), &names); err != nil {
+	if err := json.Unmarshal(readJSON(namesFile), &names); err != nil {
 		log.Error(err)
 	}
 	db.Names = names
@@ -119,7 +129,7 @@ func compilePatterns(path string, ptns map[int]string) map[int]*regexp.Regexp {
 	return reMap
 }
 
-// Processes a PDF file with pdftotext. Adapted from <https://github.com/plimble/gika>.
+// PDFToText processes a PDF file with pdftotext. Adapted from <https://github.com/plimble/gika>.
 func PDFToText(fn string, out io.Writer) error {
 	cmd := exec.Command("pdftotext", "-q", fn, "-")
 	stderr := bytes.NewBuffer(nil)
@@ -147,7 +157,7 @@ func PDFToText(fn string, out io.Writer) error {
 	return nil
 }
 
-// Create a new SotDL character database.
+// NewCharDB creates a new SotDL character database.
 func NewCharDB(pdfFn string, analyze bool) (db CharDB, err error) {
 	// Build db.
 	if _, err = os.Stat(corebookJSON); pdfFn != "" || os.IsNotExist(err) {
@@ -346,7 +356,7 @@ func (db *CharDB) extract(doc string, paths []string, pathPatterns map[int]strin
 	}
 }
 
-func (c *CharDB) analyze(doc string) {
+func (db *CharDB) analyze(doc string) {
 	for p := range ancestries {
 		path := ancestries[p]
 		reMap := compilePatterns(path, ancestryLevelPatterns)

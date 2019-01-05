@@ -1,5 +1,4 @@
-// Package sotdlgen implements a character generator for the Shadow of
-// the Demon Lord RPG.
 package sotdlgen
 
+// VERSION number.
 const VERSION = "0.2.1"

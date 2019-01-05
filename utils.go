@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var dataDir = os.Getenv("GOPATH") + "/src/github.com/gruevyhat/sotdlgen/assets"
+var dataDir = os.Getenv("GOPATH") + "/src/github.com/gruevyhat/sotdlgen/assets/"
 
 func readJson(filename string) []byte {
 	raw, _ := ioutil.ReadFile(filename)

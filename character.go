@@ -337,7 +337,6 @@ func NewCharacter(opts Opts) (c Character, err error) {
 		log.Info("Loading Character DB.")
 		db, err = NewCharDB(opts.DataFile, false)
 		if err != nil {
-			fmt.Println(db)
 			return c, err
 		}
 	}

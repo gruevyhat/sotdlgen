@@ -22,7 +22,7 @@ Options:
   -E, --expert-path=<str>   The character's 3rd lvl path (e.g., Fighter).
   -M, --master-path=<str>   The character's 7th lvl path (e.g., Myrmidon).
   -s, --seed=<hex>          Character generation signature.
-  -d, --data-dir=<path>	    Directory containing SotDL PDF file.
+  -d, --data-file=<path>	  SotDL Core Rules PDF file.
   --log-level=<str>         One of {INFO, WARNING, ERROR}. [default: ERROR]
   -h --help
   --version

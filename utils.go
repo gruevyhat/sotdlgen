@@ -7,18 +7,7 @@ import (
 	"strings"
 )
 
-var dataDir = getDataDir()
-
-func getDataDir() string {
-	dir := ""
-	if dir = os.Getenv("GOPATH"); dir != "" {
-		dir += "/src/github.com/gruevyhat/sotdlgen/"
-	} else {
-		dir += "./"
-	}
-	log.Info("Set data dir:", dir+"assets/")
-	return dir + "assets/"
-}
+var dataDir = os.Getenv("GOPATH") + "/src/github.com/gruevyhat/sotdlgen/assets"
 
 func readJson(filename string) []byte {
 	raw, _ := ioutil.ReadFile(filename)

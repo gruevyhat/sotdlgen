@@ -28,13 +28,6 @@ type CharDB struct {
 	Names []NameList        `json:"names"`
 }
 
-type NameList struct {
-	Ancestry  string   `json:"ancestry"`
-	Ethnicity string   `json:"ethnicity"`
-	Type      string   `json:"type"`
-	Names     []string `json:"names"`
-}
-
 type Levels map[int]*Level
 
 type Level struct {
@@ -99,6 +92,13 @@ var masterPathLevelPatterns = map[int]string{
 }
 
 type Patterns map[int]*regexp.Regexp
+
+type NameList struct {
+	Ancestry  string   `json:"ancestry"`
+	Ethnicity string   `json:"ethnicity"`
+	Type      string   `json:"type"`
+	Names     []string `json:"names"`
+}
 
 func (db *CharDB) buildNames() {
 	var names []NameList

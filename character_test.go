@@ -31,7 +31,7 @@ func TestNewCharacter(t *testing.T) {
 		if c.Name != o.Name {
 			t.Errorf("Incorrect name. Expected '%s'. Found '%s'.", c.Name, o.Name)
 		}
-		if c.Hash == "" {
+		if c.Seed == "" {
 			t.Error("Incorrect Hash. No value assigned")
 		}
 		if !arrayContains(genders, c.Gender) {

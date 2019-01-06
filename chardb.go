@@ -77,7 +77,7 @@ var ancestryLevelPatterns = map[int]string{
 		`(?P<Desc>.*?)\n\n`,
 	4: `(?s)Level 4 Expert %s.*?` +
 		`Characteristics (?P<Char>.*?)\n` +
-		`(?P<Desc>.*?)\n\n`,
+		`(?P<Desc>You.*?learn.*?)\n\n`,
 }
 
 var novicePathLevelPatterns = map[int]string{

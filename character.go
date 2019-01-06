@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 
 	logging "github.com/op/go-logging"
@@ -173,7 +174,8 @@ func (c *Character) setLevel(level string) {
 }
 
 func (c *Character) calcHealingRate() {
-	c.Attributes.HealingRate = int(math.Floor(float64(c.Attributes.Health) * c.Attributes.healingRateMultiplier))
+	hr := float64(c.Attributes.Health) * c.Attributes.healingRateMultiplier
+	c.Attributes.HealingRate = int(math.Floor(hr))
 }
 
 func (c *Character) increaseAttributes(i int, path string) {
@@ -221,7 +223,13 @@ func (c *Character) setPath(path string) {
 		return
 	}
 	// Add attributes, etc.
-	for i, lvl := range db.Paths[path] {
+	var keys []int
+	for k := range db.Paths[path] {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	for _, i := range keys {
+		lvl := db.Paths[path][i]
 		if i <= c.Level {
 			// Attributes
 			c.Attributes.Strength += lvl.Strength
@@ -249,20 +257,21 @@ func (c *Character) setPath(path string) {
 			}
 
 			// Talents
-			for _, tal := range lvl.Talents {
-				c.Talents = append(c.Talents, tal)
-			}
+			c.Talents = append(c.Talents, lvl.Talents...)
+
 			// Languages and Professions
-			for _, lp := range lvl.LangAndProf {
-				c.LangAndProf = append(c.LangAndProf, lp)
+			if i == 0 {
+				c.LangAndProf = append(c.LangAndProf,
+					"Two professions of your choice; you may trade one for a language.")
 			}
+			c.LangAndProf = append(c.LangAndProf, lvl.LangAndProf...)
 		}
 		// Attribute increases
 		c.increaseAttributes(i, path)
 	}
 	// Recalc
-	c.calcHealingRate()
 	c.calcDerived()
+	c.calcHealingRate()
 }
 
 // Randomly sample from name db.
@@ -388,6 +397,8 @@ func NewCharacter(opts Opts) (c Character, err error) {
 
 	// Generate base characteristics
 	log.Info("Generating attributes and characteristics.")
+	c.setGender(opts.Gender)
+	c.setName(opts.Name)
 	c.setLevel(opts.Level)
 	c.setPath(opts.Ancestry)
 	if c.Level > 0 {
@@ -401,19 +412,16 @@ func NewCharacter(opts Opts) (c Character, err error) {
 	}
 
 	// Generate stuff
-	c.setMagic()
-	c.setWeapons()
-	c.setArmor()
-	c.setEquipment()
+	//c.setMagic()
+	//c.setWeapons()
+	//c.setArmor()
+	//c.setEquipment()
 
 	// Generate fluff
-	log.Info("Generating fluff.")
-	c.setGender(opts.Gender)
-	c.setName(opts.Name)
-	c.setDescription(opts.Description)
-	c.setBackground(opts.Background)
-	c.setProfessions(opts.Professions)
-	c.setLanguages(opts.Languages)
+	//c.setDescription(opts.Description)
+	//c.setBackground(opts.Background)
+	//c.setProfessions(opts.Professions)
+	//c.setLanguages(opts.Languages)
 
 	return c, nil
 }

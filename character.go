@@ -311,7 +311,7 @@ func (c *Character) setName(name string) {
 		if len(surnames) > 0 {
 			surname = randomChoice(surnames)
 		}
-		c.Name = firstName + " " + surname
+		c.Name = trim(firstName + " " + surname)
 	}
 }
 
@@ -397,10 +397,10 @@ func NewCharacter(opts Opts) (c Character, err error) {
 
 	// Generate base characteristics
 	log.Info("Generating attributes and characteristics.")
+	c.setPath(opts.Ancestry)
 	c.setGender(opts.Gender)
 	c.setName(opts.Name)
 	c.setLevel(opts.Level)
-	c.setPath(opts.Ancestry)
 	if c.Level > 0 {
 		c.setPath(opts.NovicePath)
 	}
